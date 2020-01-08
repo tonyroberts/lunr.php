@@ -22,6 +22,7 @@ class BuildLunrIndex {
     $this->_k1 = 1.2;
     $this->documentCount = 0;
     $this->averageFieldLength = [];
+    $this->precision = 3;
   }
 
   public function add(array $doc, float $boost=null) {
@@ -153,6 +154,10 @@ class BuildLunrIndex {
     }
   }
 
+  public function precision($precision) {
+    $this->precision = $precision;
+  }
+
   public function addPipeline(string $pipeline) {
     $this->pipelines[] = $pipeline;
   }
@@ -208,6 +213,7 @@ class BuildLunrIndex {
     $fieldVectors = [];
 
     $termCache = [];
+    $precision = pow(10, $this->precision);
     $score = 0;
 
     foreach ($this->fieldTermFrequencies as $fieldRef => $terms) {
@@ -233,7 +239,7 @@ class BuildLunrIndex {
           $score *= $this->docBoosts[$docId];
         }
 
-        $scoreWithPrecision = round($score * 1000) / 1000;
+        $scoreWithPrecision = round($score * $precision) / $precision;
         // Converts 1.23456789 to 1.234.
         // Reducing the precision so that the vectors take up less
         // space when serialised. Doing it now so that they behave
